@@ -1,0 +1,6 @@
+.idea
+.vscode
+/bin
+.envrc
+*.pprof
+*.memprof
