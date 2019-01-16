@@ -11,14 +11,11 @@ type File struct {
 }
 
 type Config struct {
-	FileName string      `json:"file_name"`
-	Perm     os.FileMode `json:"perm"`
+	FileName string `json:"file_name"`
 }
 
 var (
-	defaultConfig = Config{
-		Perm: os.ModePerm,
-	}
+	defaultConfig = Config{}
 )
 
 func DefaultConfig() Config {
@@ -26,7 +23,15 @@ func DefaultConfig() Config {
 }
 
 func NewFile(v viper.Viper) (appender.Appender, error) {
-	return &File{}, nil
+	cfg := DefaultConfig()
+	if err := v.Unmarshal(&cfg); err != nil {
+		return nil, err
+	}
+	f, err := os.OpenFile(cfg.FileName, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
+	if err != nil {
+		return nil, err
+	}
+	return &File{f}, nil
 }
 
 func init() {
