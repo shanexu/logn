@@ -6,6 +6,7 @@ import (
 	"github.com/shanexu/logp/common"
 	"github.com/spf13/viper"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type RollingFile struct {
@@ -54,7 +55,23 @@ func NewRollingFile(v *viper.Viper) (appender.Appender, error) {
 	if err := common.Validate().Struct(cfg); err != nil {
 		return nil, err
 	}
-	return &RollingFile{}, nil
+	if cfg.MaxSize == 0 {
+		cfg.MaxSize = 500
+	}
+	if cfg.MaxAge == 0 {
+		cfg.MaxAge = 7
+	}
+	w := &lumberjack.Logger{
+		Filename:   cfg.FileName,
+		MaxSize:    cfg.MaxSize,
+		MaxAge:     cfg.MaxAge,
+		MaxBackups: cfg.MaxBackups,
+		LocalTime:  cfg.LocalTime,
+		Compress:   cfg.Compress,
+	}
+	return &RollingFile{
+		zapcore.AddSync(w),
+	}, nil
 }
 
 func init() {
