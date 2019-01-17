@@ -69,9 +69,7 @@ func NewRollingFile(v *viper.Viper) (appender.Appender, error) {
 		LocalTime:  cfg.LocalTime,
 		Compress:   cfg.Compress,
 	}
-	return &RollingFile{
-		zapcore.AddSync(w),
-	}, nil
+	return &RollingFile{zapcore.AddSync(w)}, nil
 }
 
 func init() {

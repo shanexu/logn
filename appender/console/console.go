@@ -13,7 +13,7 @@ type Console struct {
 }
 
 type Config struct {
-	Target `json:"target"`
+	Target `json:"target" validate:"required,oneof=stderr stdout"`
 }
 
 type Target = string

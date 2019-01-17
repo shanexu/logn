@@ -2,6 +2,7 @@ package file
 
 import (
 	"errors"
+	"github.com/mitchellh/mapstructure"
 	"github.com/shanexu/logp/appender"
 	"github.com/shanexu/logp/common"
 	"github.com/spf13/viper"
@@ -30,7 +31,9 @@ func DefaultConfig() Config {
 
 func NewFile(v *viper.Viper) (appender.Appender, error) {
 	cfg := DefaultConfig()
-	if err := v.Unmarshal(&cfg); err != nil {
+	if err := v.Unmarshal(&cfg, func(m *mapstructure.DecoderConfig) {
+		m.TagName = "json"
+	}); err != nil {
 		return nil, err
 	}
 	if err := common.Validate().Struct(cfg); err != nil {

@@ -29,3 +29,12 @@ func RegisterAppender(name string, constructor func(*viper.Viper) (Appender, err
 	return nil
 }
 
+func NewAppender(atype string, v *viper.Viper) (Appender, error){
+	_appenderMutex.RLock()
+	defer _appenderMutex.RUnlock()
+	c, ok := _appenderNameToConstructor[atype]
+	if !ok {
+		return nil, fmt.Errorf("appender type %q not found", atype)
+	}
+	return c(v)
+}

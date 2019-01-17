@@ -1,10 +1,16 @@
 package logn
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestGetLogger(t *testing.T) {
-	assert.NotNil(t, GetLogger("hello"))
+	hello := GetLogger("hello")
+	hello.Info("hello")
+	world := GetLogger("world")
+	world.Debug("world")
+
+	helloworld := GetLogger("helloworld")
+	helloworld.Info("hello world")
+	Sync()
 }
