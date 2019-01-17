@@ -1,0 +1,19 @@
+appenders:
+  console:
+    - name: CONSOLE
+      target: stdout
+  file:
+    - name: FILE
+      file_name: /tmp/app.log
+loggers:
+  root:
+    level: info
+    appender_refs:
+      - CONSOLE
+  logger:
+    - name: helloworld
+      appender_refs:
+        - CONSOLE
+        - FILE
+      level: debug
+
