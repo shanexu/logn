@@ -1,7 +1,9 @@
 package file
 
 import (
+	"errors"
 	"github.com/shanexu/logp/appender"
+	"github.com/shanexu/logp/common"
 	"github.com/spf13/viper"
 	"os"
 )
@@ -11,20 +13,27 @@ type File struct {
 }
 
 type Config struct {
-	FileName string `json:"file_name"`
+	FileName string `json:"file_name" validate:"required"`
 }
 
 var (
 	defaultConfig = Config{}
 )
 
+var (
+	errEmptyFileName = errors.New("empty file name")
+)
+
 func DefaultConfig() Config {
 	return defaultConfig
 }
 
-func NewFile(v viper.Viper) (appender.Appender, error) {
+func NewFile(v *viper.Viper) (appender.Appender, error) {
 	cfg := DefaultConfig()
 	if err := v.Unmarshal(&cfg); err != nil {
+		return nil, err
+	}
+	if err := common.Validate().Struct(cfg); err != nil {
 		return nil, err
 	}
 	f, err := os.OpenFile(cfg.FileName, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)

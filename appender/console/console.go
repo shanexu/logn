@@ -33,7 +33,7 @@ func DefaultConfig() Config {
 	return defaultConfig
 }
 
-func NewConsole(v viper.Viper) (appender.Appender, error) {
+func NewConsole(v *viper.Viper) (appender.Appender, error) {
 	cfg := DefaultConfig()
 	if err := v.Unmarshal(&cfg, func(m *mapstructure.DecoderConfig) {
 		m.TagName = "json"
