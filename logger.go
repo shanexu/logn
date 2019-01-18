@@ -93,6 +93,8 @@ type Logger interface {
 	// be inferred by the value's type. To explicitly specify a type you can pass a
 	// Field such as logp.Stringer.
 	DPanicw(msg string, keysAndValues ...interface{})
+
+	Sync() error
 }
 
 type ZapLogger struct {
@@ -181,4 +183,8 @@ func (z *ZapLogger) Panicw(msg string, keysAndValues ...interface{}) {
 
 func (z *ZapLogger) DPanicw(msg string, keysAndValues ...interface{}) {
 	z.sugar.DPanicw(msg, keysAndValues)
+}
+
+func (z *ZapLogger) Sync() error {
+	return z.sugar.Sync()
 }
