@@ -1,7 +1,6 @@
 package file
 
 import (
-	"errors"
 	"github.com/mitchellh/mapstructure"
 	"github.com/shanexu/logp/appender"
 	"github.com/shanexu/logp/common"
@@ -19,10 +18,6 @@ type Config struct {
 
 var (
 	defaultConfig = Config{}
-)
-
-var (
-	errEmptyFileName = errors.New("empty file name")
 )
 
 func DefaultConfig() Config {
