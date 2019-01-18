@@ -171,8 +171,12 @@ func init() {
 }
 
 func Sync() {
+	_nameToLogger.Range(func(_, value interface{}) bool {
+		_ = value.(Logger).Sync()
+		return true
+	})
 	for _, w := range _nameToAppender {
-		w.Sync()
+		_ = w.Sync()
 	}
 }
 
