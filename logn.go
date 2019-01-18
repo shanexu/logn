@@ -190,5 +190,6 @@ func Root() Logger {
 }
 
 func newNamedLogger(name string) Logger {
-	return &ZapLogger{_rootLogger.(*ZapLogger).sugar.With("logger", name)}
+	l, _ := newLogger(configuration.Logger{Name: name})
+	return l
 }
