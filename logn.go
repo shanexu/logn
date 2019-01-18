@@ -89,6 +89,7 @@ func newLogger(cfg configuration.Logger) (Logger, error) {
 func init() {
 	v := viper.New()
 	configFile := os.Getenv("LOGN_CONFIG")
+	debug := os.Getenv("LOG_CONFIG_DEBUG")
 	if configFile != "" {
 		ext := filepath.Ext(configFile)
 		if ext != "" {
@@ -116,10 +117,12 @@ func init() {
 		panic(err)
 	}
 
-	buf := bytes.NewBuffer(nil)
-	bs, _ := json.Marshal(cfg)
-	_ = json.Indent(buf, bs, "", "  ")
-	fmt.Println(buf.String())
+	if debug == "true" {
+		buf := bytes.NewBuffer(nil)
+		bs, _ := json.Marshal(cfg)
+		_ = json.Indent(buf, bs, "", "  ")
+		fmt.Println(buf.String())
+	}
 
 	for atype, appenders := range cfg.Appenders {
 		for _, config := range appenders {
