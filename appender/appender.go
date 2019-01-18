@@ -1,8 +1,9 @@
 package appender
 
-import "io"
+import (
+	"go.uber.org/zap/zapcore"
+)
 
 type Appender interface {
-	io.Writer
-	Sync() error
+	zapcore.WriteSyncer
 }
