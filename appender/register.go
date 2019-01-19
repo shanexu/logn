@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	_appenderNameToConstructor = make(map[string]func(*viper.Viper) (Appender, error), 0)
+	_appenderNameToConstructor = make(map[string]func(*viper.Viper) (Writer, error), 0)
 	_appenderMutex sync.RWMutex
 )
 
@@ -16,7 +16,7 @@ var (
 	errNoAppenderNameSpecified = errors.New("no appender name specified")
 )
 
-func RegisterAppender(name string, constructor func(*viper.Viper) (Appender, error)) error {
+func RegisterAppender(name string, constructor func(*viper.Viper) (Writer, error)) error {
 	_appenderMutex.Lock()
 	defer _appenderMutex.Unlock()
 	if name == "" {
@@ -29,7 +29,7 @@ func RegisterAppender(name string, constructor func(*viper.Viper) (Appender, err
 	return nil
 }
 
-func NewAppender(atype string, v *viper.Viper) (Appender, error){
+func NewAppender(atype string, v *viper.Viper) (Writer, error){
 	_appenderMutex.RLock()
 	defer _appenderMutex.RUnlock()
 	c, ok := _appenderNameToConstructor[atype]

@@ -45,7 +45,7 @@ type Config struct {
 	Compress bool `json:"compress"`
 }
 
-func NewRollingFile(v *viper.Viper) (appender.Appender, error) {
+func NewRollingFile(v *viper.Viper) (appender.Writer, error) {
 	cfg := Config{}
 	if err := v.Unmarshal(&cfg, func(m *mapstructure.DecoderConfig) {
 		m.TagName = "json"

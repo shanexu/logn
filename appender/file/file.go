@@ -24,7 +24,7 @@ func DefaultConfig() Config {
 	return defaultConfig
 }
 
-func NewFile(v *viper.Viper) (appender.Appender, error) {
+func NewFile(v *viper.Viper) (appender.Writer, error) {
 	cfg := DefaultConfig()
 	if err := v.Unmarshal(&cfg, func(m *mapstructure.DecoderConfig) {
 		m.TagName = "json"

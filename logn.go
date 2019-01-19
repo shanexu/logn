@@ -20,9 +20,9 @@ import (
 
 var (
 	_nameToLogger   = sync.Map{}
-	_nameToAppender = make(map[string]appender.Appender)
+	_nameToAppender = make(map[string]appender.Writer)
 	_rootLogger     Logger
-	_rootAppender   appender.Appender
+	_rootAppender   appender.Writer
 	_rootLevel      zapcore.LevelEnabler
 )
 
@@ -46,8 +46,8 @@ func newLevelEnabler(l string) (zapcore.LevelEnabler, error) {
 	return zap.NewAtomicLevelAt(*level), nil
 }
 
-func newAppender(aps []string) (appender.Appender, error) {
-	appendersMap := make(map[string]appender.Appender)
+func newAppender(aps []string) (appender.Writer, error) {
+	appendersMap := make(map[string]appender.Writer)
 	for _, aname := range aps {
 		a, ok := _nameToAppender[aname]
 		if !ok {
