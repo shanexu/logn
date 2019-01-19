@@ -2,9 +2,8 @@ package console
 
 import (
 	"fmt"
-	"github.com/mitchellh/mapstructure"
 	"github.com/shanexu/logp/appender"
-	"github.com/spf13/viper"
+	"github.com/shanexu/logp/common"
 	"os"
 )
 
@@ -13,7 +12,7 @@ type Console struct {
 }
 
 type Config struct {
-	Target `json:"target" validate:"required,oneof=stderr stdout"`
+	Target `config:"target" validate:"required"`
 }
 
 type Target = string
@@ -33,11 +32,9 @@ func DefaultConfig() Config {
 	return defaultConfig
 }
 
-func NewConsole(v *viper.Viper) (appender.Writer, error) {
+func NewConsole(v *common.Config) (appender.Writer, error) {
 	cfg := DefaultConfig()
-	if err := v.Unmarshal(&cfg, func(m *mapstructure.DecoderConfig) {
-		m.TagName = "json"
-	}); err != nil {
+	if err := v.Unpack(&cfg); err != nil {
 		return nil, err
 	}
 	switch cfg.Target {
@@ -52,7 +49,5 @@ func NewConsole(v *viper.Viper) (appender.Writer, error) {
 }
 
 func init() {
-	if err := appender.RegisterAppender("console", NewConsole); err != nil {
-		panic(err)
-	}
+	appender.RegisterType("console", NewConsole)
 }

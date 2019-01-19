@@ -7,6 +7,8 @@ appenders:
   file:
     - name: FILE
       file_name: /tmp/app.log
+    - name: METRICS
+      file_name: /tmp/metrics.log
 loggers:
   root:
     level: info

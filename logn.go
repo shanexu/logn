@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"github.com/shanexu/logp/appender"
+	"github.com/shanexu/logp/common"
 	"github.com/shanexu/logp/configuration"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -108,51 +109,57 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("logn using config file:", v.ConfigFileUsed())
-	cfg := configuration.Configuration{}
-	err = v.Unmarshal(&cfg, func(m *mapstructure.DecoderConfig) {
+
+	if debug == "true" {
+		fmt.Println("logn using config file:", v.ConfigFileUsed())
+	}
+
+	cfg2 := configuration.Configuration{}
+	err = v.Unmarshal(&cfg2, func(m *mapstructure.DecoderConfig) {
 		m.TagName = "json"
 	})
 	if err != nil {
 		panic(err)
 	}
 
+	cfg, err := common.LoadFile(v.ConfigFileUsed())
+	if err != nil {
+		panic(err)
+	}
+
 	if debug == "true" {
 		buf := bytes.NewBuffer(nil)
-		bs, _ := json.Marshal(cfg)
+		bs, _ := json.Marshal(cfg2)
 		_ = json.Indent(buf, bs, "", "  ")
 		fmt.Println(buf.String())
 	}
 
-	for atype, appenders := range cfg.Appenders {
-		for _, config := range appenders {
-			vv := viper.New()
-			if err := vv.MergeConfigMap(config); err != nil {
-				panic(err)
-			}
-			a, err := appender.NewAppender(atype, vv)
+	appendersMap, _ := cfg.Child("appenders", -1)
+	for _, atype := range appendersMap.GetFields() {
+		idx, _ := appendersMap.CountField(atype)
+		for i := 0; i < idx ; i++ {
+			v, _ := appendersMap.Child(atype, i)
+			name, _ := v.String("name", -1)
+			appender, err := appender.CreateWriter(atype, v)
 			if err != nil {
 				panic(err)
 			}
-			if _, found := _nameToAppender[config.Name()]; found {
-				panic(fmt.Errorf("duplicated appender name %q", config.Name()))
-			}
-			_nameToAppender[config.Name()] = a
+			_nameToAppender[name] = appender
 		}
 	}
 
-	cfg.Loggers.Root.Name = "__root__"
-	_rootAppender, err = newAppender(cfg.Loggers.Root.AppenderRefs)
+	cfg2.Loggers.Root.Name = "__root__"
+	_rootAppender, err = newAppender(cfg2.Loggers.Root.AppenderRefs)
 	if err != nil {
 		panic(err)
 	}
-	_rootLevel, err = newLevelEnabler(cfg.Loggers.Root.Level)
+	_rootLevel, err = newLevelEnabler(cfg2.Loggers.Root.Level)
 	if err != nil {
 		panic(err)
 	}
 	_rootLogger = newRootLogger()
 
-	for _, c := range cfg.Loggers.Logger {
+	for _, c := range cfg2.Loggers.Logger {
 		l, err := newLogger(c)
 		if err != nil {
 			panic(err)

@@ -1,10 +1,8 @@
 package file
 
 import (
-	"github.com/mitchellh/mapstructure"
 	"github.com/shanexu/logp/appender"
 	"github.com/shanexu/logp/common"
-	"github.com/spf13/viper"
 	"os"
 )
 
@@ -13,7 +11,7 @@ type File struct {
 }
 
 type Config struct {
-	FileName string `json:"file_name" validate:"required"`
+	FileName string `config:"file_name" validate:"required"`
 }
 
 var (
@@ -24,11 +22,9 @@ func DefaultConfig() Config {
 	return defaultConfig
 }
 
-func NewFile(v *viper.Viper) (appender.Writer, error) {
+func NewFile(v *common.Config) (appender.Writer, error) {
 	cfg := DefaultConfig()
-	if err := v.Unmarshal(&cfg, func(m *mapstructure.DecoderConfig) {
-		m.TagName = "json"
-	}); err != nil {
+	if err := v.Unpack(&cfg); err != nil {
 		return nil, err
 	}
 	if err := common.Validate().Struct(cfg); err != nil {
@@ -42,7 +38,5 @@ func NewFile(v *viper.Viper) (appender.Writer, error) {
 }
 
 func init() {
-	if err := appender.RegisterAppender("file", NewFile); err != nil {
-		panic(err)
-	}
+	appender.RegisterType("file", NewFile)
 }
