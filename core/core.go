@@ -28,8 +28,8 @@ func (c *Core) GetLogger(name string) *ZapLogger {
 		return logger.(*ZapLogger)
 	}
 	zl := c.newNamedLogger(name)
-	zl1, _ := c.nameToLogger.LoadOrStore(name, zl)
-	return zl1.(*ZapLogger)
+	v, _ := c.nameToLogger.LoadOrStore(name, zl)
+	return v.(*ZapLogger)
 }
 
 func New(rawConfig *common.Config) (*Core, error) {

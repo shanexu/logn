@@ -17,11 +17,6 @@ type ConfigNamespace struct {
 	config *Config
 }
 
-type NamedConfig struct {
-	Name   string                 `config:"name"`
-	Config map[string]interface{} `config:",inline"`
-}
-
 var configOpts = []ucfg.Option{
 	ucfg.PathSep("."),
 	ucfg.ResolveEnv,
@@ -134,6 +129,21 @@ func (c *Config) HasField(name string) bool {
 
 func (c *Config) CountField(name string) (int, error) {
 	return c.access().CountField(name)
+}
+
+func (c *Config) Name() (string, error) {
+	return c.access().String("name", -1)
+}
+
+func (c *Config) MustName(fallback ...string) string {
+	name, err := c.Name()
+	if err != nil {
+		if len(fallback) > 0 {
+			return fallback[0]
+		}
+		return ""
+	}
+	return name
 }
 
 func (c *Config) Bool(name string, idx int) (bool, error) {
