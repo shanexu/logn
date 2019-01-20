@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mitchellh/mapstructure"
-	"github.com/shanexu/logp/appender"
+	"github.com/shanexu/logp/appender/writer"
 	"github.com/shanexu/logp/common"
 	"github.com/shanexu/logp/config"
 	"github.com/shanexu/logp/configuration"
@@ -23,9 +23,9 @@ import (
 
 var (
 	_nameToLogger   = sync.Map{}
-	_nameToAppender = make(map[string]appender.Writer)
+	_nameToAppender = make(map[string]writer.Writer)
 	_rootLogger     Logger
-	_rootAppender   appender.Writer
+	_rootAppender   writer.Writer
 	_rootLevel      zapcore.LevelEnabler
 )
 
@@ -49,8 +49,8 @@ func newLevelEnabler(l string) (zapcore.LevelEnabler, error) {
 	return zap.NewAtomicLevelAt(*level), nil
 }
 
-func newAppender(aps []string) (appender.Writer, error) {
-	appendersMap := make(map[string]appender.Writer)
+func newAppender(aps []string) (writer.Writer, error) {
+	appendersMap := make(map[string]writer.Writer)
 	for _, aname := range aps {
 		a, ok := _nameToAppender[aname]
 		if !ok {
@@ -143,7 +143,7 @@ func init() {
 	for atype, appenders := range config.Appenders {
 		for _, v := range appenders {
 			name, _ := v.String("name", -1)
-			appender, err := appender.CreateWriter(atype, v)
+			appender, err := writer.CreateWriter(atype, v)
 			if err != nil {
 				panic(err)
 			}

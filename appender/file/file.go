@@ -1,7 +1,7 @@
 package file
 
 import (
-	"github.com/shanexu/logp/appender"
+	"github.com/shanexu/logp/appender/writer"
 	"github.com/shanexu/logp/common"
 	"os"
 )
@@ -22,7 +22,7 @@ func DefaultConfig() Config {
 	return defaultConfig
 }
 
-func NewFile(v *common.Config) (appender.Writer, error) {
+func NewFile(v *common.Config) (writer.Writer, error) {
 	cfg := DefaultConfig()
 	if err := v.Unpack(&cfg); err != nil {
 		return nil, err
@@ -38,5 +38,5 @@ func NewFile(v *common.Config) (appender.Writer, error) {
 }
 
 func init() {
-	appender.RegisterType("file", NewFile)
+	writer.RegisterType("file", NewFile)
 }

@@ -1,7 +1,7 @@
 package rollingfile
 
 import (
-	"github.com/shanexu/logp/appender"
+	"github.com/shanexu/logp/appender/writer"
 	"github.com/shanexu/logp/common"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -43,7 +43,7 @@ type Config struct {
 	Compress bool `config:"compress"`
 }
 
-func NewRollingFile(v *common.Config) (appender.Writer, error) {
+func NewRollingFile(v *common.Config) (writer.Writer, error) {
 	cfg := Config{}
 	if err := v.Unpack(&cfg); err != nil {
 		return nil, err
@@ -69,5 +69,5 @@ func NewRollingFile(v *common.Config) (appender.Writer, error) {
 }
 
 func init() {
-	appender.RegisterType("rolling_file", NewRollingFile)
+	writer.RegisterType("rolling_file", NewRollingFile)
 }

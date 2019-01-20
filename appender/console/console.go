@@ -2,7 +2,7 @@ package console
 
 import (
 	"fmt"
-	"github.com/shanexu/logp/appender"
+	"github.com/shanexu/logp/appender/writer"
 	"github.com/shanexu/logp/common"
 	"os"
 )
@@ -32,7 +32,7 @@ func DefaultConfig() Config {
 	return defaultConfig
 }
 
-func NewConsole(v *common.Config) (appender.Writer, error) {
+func NewConsole(v *common.Config) (writer.Writer, error) {
 	cfg := DefaultConfig()
 	if err := v.Unpack(&cfg); err != nil {
 		return nil, err
@@ -49,5 +49,5 @@ func NewConsole(v *common.Config) (appender.Writer, error) {
 }
 
 func init() {
-	appender.RegisterType("console", NewConsole)
+	writer.RegisterType("console", NewConsole)
 }
