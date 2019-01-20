@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/shanexu/logp/appender"
 	"github.com/shanexu/logp/common"
+	"github.com/shanexu/logp/config"
 	"github.com/shanexu/logp/configuration"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -134,15 +135,19 @@ func init() {
 		fmt.Println(buf.String())
 	}
 
-	appendersMap, _ := cfg.Child("appenders", -1)
-	for _, atype := range appendersMap.GetFields() {
-		idx, _ := appendersMap.CountField(atype)
-		for i := 0; i < idx ; i++ {
-			v, _ := appendersMap.Child(atype, i)
+	config := config.Config{}
+	if err := cfg.Unpack(&config); err != nil {
+		panic(err)
+	}
+	for atype, appenders := range config.Appenders {
+		for _, v := range appenders {
 			name, _ := v.String("name", -1)
 			appender, err := appender.CreateWriter(atype, v)
 			if err != nil {
 				panic(err)
+			}
+			if _, exist := _nameToAppender[name]; exist {
+				panic(fmt.Errorf("dublicated appender %q", name))
 			}
 			_nameToAppender[name] = appender
 		}
