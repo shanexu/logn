@@ -1,9 +1,9 @@
 package core
 
 import (
-	"errors"
 	"github.com/shanexu/logp/appender"
 	"github.com/shanexu/logp/common"
+	cfg "github.com/shanexu/logp/config"
 	"go.uber.org/zap/zapcore"
 	"sync"
 )
@@ -15,8 +15,18 @@ type Core struct {
 	rootLevel      zapcore.Level
 }
 
-func New(rawConfig *common.Config) (*Core, error) {
-	rawConfig.Unpack()
+//func (c *Core)GetLogger(name string) logn.Logger {
+//	logger, ok := c.nameToLogger.Load(name)
+//	if ok {
+//
+//	}
+//}
 
-	return nil, errors.New("not implemented")
+func New(rawConfig *common.Config) (*Core, error) {
+	config := cfg.DefaultConfig()
+	err := rawConfig.Unpack(&config)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
 }

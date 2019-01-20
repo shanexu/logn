@@ -10,6 +10,7 @@ import (
 	"github.com/shanexu/logp/common"
 	"github.com/shanexu/logp/config"
 	"github.com/shanexu/logp/configuration"
+	"github.com/shanexu/logp/core"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -33,11 +34,11 @@ var (
 )
 
 func newRootLogger() Logger {
-	core := zapcore.NewCore(
+	zc := zapcore.NewCore(
 		zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
 		_rootAppender,
 		_rootLevel)
-	return &ZapLogger{zap.New(core).Sugar()}
+	return core.NewZapLogger(zap.New(zc).Sugar())
 }
 
 func newLevelEnabler(l string) (zapcore.LevelEnabler, error) {
@@ -202,7 +203,7 @@ func GetLogger(name string) Logger {
 }
 
 func Root() Logger {
-	return &ZapLogger{}
+	return &core.ZapLogger{}
 }
 
 func newNamedLogger(name string) Logger {
