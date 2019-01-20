@@ -8,19 +8,19 @@ import (
 	"sync"
 )
 
-type Factory func(config *common.Config) (Writer, error)
+type WriterFactory func(config *common.Config) (Writer, error)
 
 var (
 	_appenderNameToConstructor = make(map[string]func(*viper.Viper) (Writer, error))
 	_appenderMutex             sync.RWMutex
-	writers                    = map[string]Factory{}
+	writers                    = map[string]WriterFactory{}
 )
 
 var (
 	errNoAppenderNameSpecified = errors.New("no appender name specified")
 )
 
-func RegisterType(name string, f Factory) {
+func RegisterType(name string, f WriterFactory) {
 	if writers[name] != nil {
 		panic(fmt.Errorf("writer type  '%v' exists already", name))
 	}

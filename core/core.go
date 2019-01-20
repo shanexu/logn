@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"github.com/shanexu/logp/appender"
 	"github.com/shanexu/logp/common"
 	cfg "github.com/shanexu/logp/config"
@@ -38,5 +39,10 @@ func New(rawConfig *common.Config) (*Core, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	for appenderType, appenderConfigs := range config.Appenders {
+		fmt.Println(appenderType, appenderConfigs)
+	}
+
 	return nil, nil
 }
