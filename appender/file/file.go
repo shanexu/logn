@@ -27,9 +27,6 @@ func NewFile(v *common.Config) (writer.Writer, error) {
 	if err := v.Unpack(&cfg); err != nil {
 		return nil, err
 	}
-	if err := common.Validate().Struct(cfg); err != nil {
-		return nil, err
-	}
 	f, err := os.OpenFile(cfg.FileName, os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0644)
 	if err != nil {
 		return nil, err
