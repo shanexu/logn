@@ -1,9 +1,9 @@
 package appender
 
 import (
-	"github.com/shanexu/logp/appender/encoder"
-	"github.com/shanexu/logp/appender/writer"
-	"github.com/shanexu/logp/common"
+	"github.com/shanexu/logn/appender/encoder"
+	"github.com/shanexu/logn/appender/writer"
+	"github.com/shanexu/logn/common"
 )
 
 type Appender struct {

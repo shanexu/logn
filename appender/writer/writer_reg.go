@@ -2,7 +2,7 @@ package writer
 
 import (
 	"fmt"
-	"github.com/shanexu/logp/common"
+	"github.com/shanexu/logn/common"
 )
 
 type Factory func(config *common.Config) (Writer, error)

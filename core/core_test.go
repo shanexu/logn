@@ -1,9 +1,8 @@
 package core
 
 import (
-	"github.com/shanexu/logp/common"
+	"github.com/shanexu/logn/common"
 	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
 	"testing"
 )
 
@@ -51,7 +50,4 @@ loggers:
 	helloworld := c.GetLogger("helloworld")
 	helloworld.Info("hello world")
 	c.Sync()
-
-	z, _ := zap.NewProduction()
-	z.Info("hell")
 }

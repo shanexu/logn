@@ -3,9 +3,9 @@ package core
 import (
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/shanexu/logp/appender"
-	"github.com/shanexu/logp/common"
-	cfg "github.com/shanexu/logp/config"
+	"github.com/shanexu/logn/appender"
+	"github.com/shanexu/logn/common"
+	cfg "github.com/shanexu/logn/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"sync"
@@ -86,18 +86,16 @@ func (c *Core) newLogger(loggerCfg cfg.Logger) (*ZapLogger, error) {
 		zcs = append(zcs, zapcore.NewCore(a.Encoder, a.Writer, level))
 	}
 	zt := zapcore.NewTee(zcs...)
-	l := zap.New(zt, zap.AddCaller(), zap.AddCallerSkip(1)).Named(name).Sugar()
-	return NewZapLogger(l), nil
+	return NewZapLogger(zap.New(zt, zap.AddCaller(), zap.AddCallerSkip(1)).Named(name).Sugar()), nil
 }
 
-func (c *Core) newNamedLogger(name string) *ZapLogger {
+func (c *Core) newNamedLogger(name string) (z *ZapLogger) {
 	zcs := make([]zapcore.Core, 0)
 	for _, a := range c.rootAppenders {
 		zcs = append(zcs, zapcore.NewCore(a.Encoder, a.Writer, c.rootLevel))
 	}
 	zt := zapcore.NewTee(zcs...)
-	l := zap.New(zt, zap.AddCaller(), zap.AddCallerSkip(1)).Named(name).Sugar()
-	return NewZapLogger(l)
+	return NewZapLogger(zap.New(zt, zap.AddCaller(), zap.AddCallerSkip(1)).Named(name).Sugar())
 }
 
 func (c *Core) GetLogger(name string) *ZapLogger {
@@ -172,7 +170,7 @@ func New(rawConfig *common.Config) (*Core, error) {
 	return &core, nil
 }
 
-func (c *Core)Sync() {
+func (c *Core) Sync() {
 	c.nameToLogger.Range(func(_, value interface{}) bool {
 		value.(*ZapLogger).Sync()
 		return false

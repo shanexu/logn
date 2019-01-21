@@ -6,11 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mitchellh/mapstructure"
-	"github.com/shanexu/logp/appender/writer"
-	"github.com/shanexu/logp/common"
-	"github.com/shanexu/logp/config"
-	"github.com/shanexu/logp/configuration"
-	"github.com/shanexu/logp/core"
+	"github.com/shanexu/logn/appender/writer"
+	"github.com/shanexu/logn/common"
+	"github.com/shanexu/logn/config"
+	"github.com/shanexu/logn/configuration"
+	"github.com/shanexu/logn/core"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -86,7 +86,7 @@ func newLogger(cfg configuration.Logger) (Logger, error) {
 		l = le
 	}
 	core := zapcore.NewCore(zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()), a, l)
-	return zap.New(core).With(zap.String("logger", cfg.Name)).Sugar(), nil
+	return zap.New(core).Named(cfg.Name).Sugar(), nil
 }
 
 func init() {

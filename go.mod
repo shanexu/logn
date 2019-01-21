@@ -1,4 +1,4 @@
-module github.com/shanexu/logp
+module github.com/shanexu/logn
 
 require (
 	github.com/elastic/go-ucfg v0.6.5

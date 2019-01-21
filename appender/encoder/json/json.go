@@ -1,8 +1,8 @@
 package json
 
 import (
-	"github.com/shanexu/logp/appender/encoder"
-	"github.com/shanexu/logp/common"
+	"github.com/shanexu/logn/appender/encoder"
+	"github.com/shanexu/logn/common"
 	"go.uber.org/zap/zapcore"
 )
 

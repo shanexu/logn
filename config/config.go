@@ -1,6 +1,6 @@
 package config
 
-import "github.com/shanexu/logp/common"
+import "github.com/shanexu/logn/common"
 
 type Config struct {
 	Appenders map[string][]*common.Config `config:"appenders"`

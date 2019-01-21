@@ -1,8 +1,8 @@
 package rollingfile
 
 import (
-	"github.com/shanexu/logp/appender/writer"
-	"github.com/shanexu/logp/common"
+	"github.com/shanexu/logn/appender/writer"
+	"github.com/shanexu/logn/common"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 )

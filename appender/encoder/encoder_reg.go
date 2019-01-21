@@ -2,7 +2,7 @@ package encoder
 
 import (
 	"fmt"
-	"github.com/shanexu/logp/common"
+	"github.com/shanexu/logn/common"
 )
 
 type Factory func(*common.Config) (Encoder, error)

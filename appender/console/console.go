@@ -2,8 +2,8 @@ package console
 
 import (
 	"fmt"
-	"github.com/shanexu/logp/appender/writer"
-	"github.com/shanexu/logp/common"
+	"github.com/shanexu/logn/appender/writer"
+	"github.com/shanexu/logn/common"
 	"os"
 )
 
