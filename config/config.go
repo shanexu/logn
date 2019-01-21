@@ -24,7 +24,8 @@ type RootLogger struct {
 }
 
 type Logger struct {
-	Name         string   `config:"name"`
+	Name         string   `config:"name" validate:"required"`
+	Level        string   `config:"level"`
 	AppenderRefs []string `config:"appender_refs"`
 }
 

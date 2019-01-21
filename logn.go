@@ -143,7 +143,7 @@ func init() {
 	for atype, appenders := range config.Appenders {
 		for _, v := range appenders {
 			name, _ := v.String("name", -1)
-			appender, err := writer.CreateWriter(atype, v)
+			appender, err := writer.NewWriter(atype, v)
 			if err != nil {
 				panic(err)
 			}

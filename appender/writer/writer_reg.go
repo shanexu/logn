@@ -18,7 +18,7 @@ func RegisterType(name string, f Factory) {
 	writers[name] = f
 }
 
-func CreateWriter(name string, config *common.Config) (Writer, error) {
+func NewWriter(name string, config *common.Config) (Writer, error) {
 	factory := writers[name]
 	if factory == nil {
 		return nil, fmt.Errorf("writer type %v undefined", name)

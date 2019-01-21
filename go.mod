@@ -6,7 +6,7 @@ require (
 	github.com/go-playground/universal-translator v0.16.0 // indirect
 	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/mitchellh/mapstructure v1.1.2
-	github.com/pkg/errors v0.8.1 // indirect
+	github.com/pkg/errors v0.8.1
 	github.com/spf13/viper v1.3.1
 	github.com/stretchr/testify v1.3.0
 	go.uber.org/atomic v1.3.2 // indirect

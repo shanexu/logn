@@ -32,3 +32,14 @@ func (set StringSet) Has(s string) (exists bool) {
 	}
 	return
 }
+
+func (set StringSet) ToSlice() []string {
+	if set == nil {
+		return nil
+	}
+	ss := make([]string, 0)
+	for s := range set {
+		ss = append(ss, s)
+	}
+	return ss
+}
