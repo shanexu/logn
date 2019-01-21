@@ -3,7 +3,7 @@ appenders:
     - name: CONSOLE
       target: stdout
       encoder:
-        json:
+        console:
   file:
     - name: FILE
       file_name: /tmp/app.log

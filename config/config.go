@@ -36,7 +36,6 @@ func init() {
 name: CONSOLE
 target: stdout
 encoder:
-  json:
 `)},
 		},
 		Loggers: Loggers{
