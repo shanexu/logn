@@ -14,7 +14,7 @@ import (
 	_ "github.com/shanexu/logn/includes"
 )
 
-var logncore *core.Core
+var logncore core.Core
 
 func init() {
 	configFile := os.Getenv("LOGN_CONFIG")
@@ -54,7 +54,8 @@ func init() {
 		panic(err)
 	}
 
-	co, err := core.New(rawConfig)
+	co, err := core.CreateCore(rawConfig)
+
 	if err != nil {
 		panic(err)
 	}
@@ -72,6 +73,6 @@ func Sync() {
 	logncore.Sync()
 }
 
-func GetLogger(name string) Logger {
+func GetLogger(name string) core.Logger {
 	return logncore.GetLogger(name)
 }

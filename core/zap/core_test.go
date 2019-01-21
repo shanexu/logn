@@ -1,4 +1,4 @@
-package core
+package zap
 
 import (
 	"github.com/shanexu/logn/common"
