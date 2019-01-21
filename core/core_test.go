@@ -2,6 +2,7 @@ package core
 
 import (
 	"github.com/shanexu/logn/common"
+	_ "github.com/shanexu/logn/includes"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

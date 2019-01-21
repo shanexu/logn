@@ -10,6 +10,8 @@ import (
 	"os/signal"
 	"path/filepath"
 	"syscall"
+
+	_ "github.com/shanexu/logn/includes"
 )
 
 var logncore *core.Core
