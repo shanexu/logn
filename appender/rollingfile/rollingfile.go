@@ -19,7 +19,7 @@ type Config struct {
 
 	// MaxSize is the maximum size in megabytes of the log file before it gets
 	// rotated. It defaults to 100 megabytes.
-	MaxSize int `config:"max_size" validate:"omitempty,gte=1"`
+	MaxSize int `config:"max_size" validate:"min=1"`
 
 	// MaxAge is the maximum number of days to retain old log files based on the
 	// timestamp encoded in their filename.  Note that a day is defined as 24
@@ -44,15 +44,11 @@ type Config struct {
 }
 
 func NewRollingFile(v *common.Config) (writer.Writer, error) {
-	cfg := Config{}
+	cfg := Config{
+		MaxSize: 500,
+	}
 	if err := v.Unpack(&cfg); err != nil {
 		return nil, err
-	}
-	if err := common.Validate().Struct(cfg); err != nil {
-		return nil, err
-	}
-	if cfg.MaxSize == 0 {
-		cfg.MaxSize = 500
 	}
 	if cfg.MaxAge == 0 {
 		cfg.MaxAge = 7

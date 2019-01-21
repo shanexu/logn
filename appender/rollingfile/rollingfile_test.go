@@ -1,8 +1,7 @@
 package rollingfile
 
 import (
-	"bytes"
-	"github.com/spf13/viper"
+	"github.com/shanexu/logn/common"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -15,17 +14,19 @@ func TestNewRollingFile(t *testing.T) {
 	}{
 		{"case1", `
 file_name: /tmp/app.log
-max_size: -1`, true},
+max_size: -1
+encoder:
+ json:`, true},
 		{"case2", `
-file_name: /tmp/app.log`, false},
+file_name: /tmp/app.log
+encoder:
+ json:`, false},
 	}
 
 	for _, c := range tests {
-		v := viper.New()
-		v.SetConfigType("yml")
-		err := v.ReadConfig(bytes.NewReader([]byte(c.config)))
-		assert.Nil(t, err)
-		_, err = NewRollingFile(v)
-		assert.Equal(t, c.hasErr, err != nil)
+		cfg, err := common.NewConfigFrom(c.config)
+		assert.Nil(t, err, c.name)
+		_, err = NewRollingFile(cfg)
+		assert.Equal(t, c.hasErr, err != nil, c.name)
 	}
 }
