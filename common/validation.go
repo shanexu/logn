@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	if err := ucfg.RegisterValidator("oneof", func(v interface{}, params string) error {
+	if err := ucfg.RegisterValidator("logn.oneof", func(v interface{}, params string) error {
 		if v == nil {
 			return nil
 		}

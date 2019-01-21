@@ -12,7 +12,7 @@ type Console struct {
 }
 
 type Config struct {
-	Target `config:"target" validate:"required,oneof=stderr stdout"`
+	Target `config:"target" validate:"required,logn.oneof=stderr stdout"`
 }
 
 type Target = string
