@@ -86,7 +86,7 @@ func (c *Core) newLogger(loggerCfg cfg.Logger) (*ZapLogger, error) {
 		zcs = append(zcs, zapcore.NewCore(a.Encoder, a.Writer, level))
 	}
 	zt := zapcore.NewTee(zcs...)
-	l := zap.New(zt).Named(name).Sugar()
+	l := zap.New(zt, zap.AddCaller(), zap.AddCallerSkip(1)).Named(name).Sugar()
 	return NewZapLogger(l), nil
 }
 
@@ -96,7 +96,7 @@ func (c *Core) newNamedLogger(name string) *ZapLogger {
 		zcs = append(zcs, zapcore.NewCore(a.Encoder, a.Writer, c.rootLevel))
 	}
 	zt := zapcore.NewTee(zcs...)
-	l := zap.New(zt).Named(name).Sugar()
+	l := zap.New(zt, zap.AddCaller(), zap.AddCallerSkip(1)).Named(name).Sugar()
 	return NewZapLogger(l)
 }
 
@@ -170,4 +170,14 @@ func New(rawConfig *common.Config) (*Core, error) {
 	}
 
 	return &core, nil
+}
+
+func (c *Core)Sync() {
+	c.nameToLogger.Range(func(_, value interface{}) bool {
+		value.(*ZapLogger).Sync()
+		return false
+	})
+	for _, a := range c.rootAppenders {
+		a.Writer.Sync()
+	}
 }

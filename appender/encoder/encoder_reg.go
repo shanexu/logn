@@ -17,6 +17,7 @@ func RegisterType(name string, gen Factory) {
 	if _, exists := encoders[name]; exists {
 		panic(fmt.Sprintf("encoder %q already registered", name))
 	}
+	encoders[name] = gen
 }
 
 func CreateEncoder(cfg Config) (Encoder, error) {
