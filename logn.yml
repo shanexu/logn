@@ -4,6 +4,7 @@ appenders:
       target: stdout
       encoder:
         console:
+          time_encoder: ISO8601
   file:
     - name: FILE
       file_name: /tmp/app.log

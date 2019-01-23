@@ -2,22 +2,12 @@ package json
 
 import (
 	"github.com/shanexu/logn/appender/encoder"
+	ec "github.com/shanexu/logn/appender/encoder/common"
 	"github.com/shanexu/logn/common"
 	"go.uber.org/zap/zapcore"
 )
 
-// Config is used to pass encoding parameters to New.
-type Config struct {
-	TimeKey       string `json:"time_key"`
-	LevelKey      string `json:"level_key"`
-	NameKey       string `json:"name_key"`
-	CallerKey     string `json:"caller_key"`
-	MessageKey    string `json:"message_key"`
-	StacktraceKey string `json:"stacktrace_key"`
-	LineEnding    string `json:"line_ending"`
-}
-
-var defaultConfig = Config{
+var defaultConfig = ec.JsonEncoderConfig{
 	TimeKey:       "ts",
 	LevelKey:      "level",
 	NameKey:       "logger",
@@ -25,6 +15,7 @@ var defaultConfig = Config{
 	MessageKey:    "msg",
 	StacktraceKey: "stacktrace",
 	LineEnding:    "\n",
+	TimeEncoder:   "epoch",
 }
 
 func init() {
@@ -49,6 +40,12 @@ func init() {
 			EncodeDuration: zapcore.SecondsDurationEncoder,
 			EncodeCaller:   zapcore.ShortCallerEncoder,
 		}
+
+		te, err := ec.GetTimeEncoder(config.TimeEncoder)
+		if err != nil {
+			return nil, err
+		}
+		encoderConfig.EncodeTime = te
 
 		return zapcore.NewJSONEncoder(encoderConfig), nil
 	})
