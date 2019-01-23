@@ -13,7 +13,7 @@ Logn loads configuration file from system environment virable `LOGN_CONFIG`. If 
 variable is unset, then Logn will try to load the configuration file from current 
 work directory, the file name is "logn.yaml" or "logn.yml".
 
-```yaml
+```yam
 appenders:
   console:
     - name: CONSOLE
@@ -25,6 +25,17 @@ appenders:
       file_name: /tmp/app.log
       encoder:
         json:
+    - name: GELF_FILE
+      file_name: /tmp/app_gelf.log
+      encoder:
+        gelf:
+          key_value_pairs:
+            - key: env
+              value: ${ENV:dev}
+            - key: app
+              value: ${APPNAME:demo}
+            - key: file
+              value: app.log
     - name: METRICS
       file_name: /tmp/metrics.log
       encoder:
@@ -39,7 +50,9 @@ loggers:
       appender_refs:
         - CONSOLE
         - FILE
+        - GELF_FILE
       level: debug
+
 ```
 
 sample code:

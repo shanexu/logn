@@ -17,7 +17,7 @@ appenders:
             - key: env
               value: ${ENV:dev}
             - key: app
-              value: ${APPNAME:test}
+              value: ${APPNAME:demo}
             - key: file
               value: app.log
     - name: METRICS
