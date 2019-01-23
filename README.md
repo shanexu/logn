@@ -25,8 +25,10 @@ appenders:
       file_name: /tmp/app.log
       encoder:
         json:
+  rolling_file:
     - name: GELF_FILE
       file_name: /tmp/app_gelf.log
+      max_size: 500
       encoder:
         gelf:
           key_value_pairs:
@@ -36,10 +38,6 @@ appenders:
               value: ${APPNAME:demo}
             - key: file
               value: app.log
-    - name: METRICS
-      file_name: /tmp/metrics.log
-      encoder:
-        json:
 loggers:
   root:
     level: info
@@ -52,7 +50,7 @@ loggers:
         - FILE
         - GELF_FILE
       level: debug
-
+      
 ```
 
 sample code:

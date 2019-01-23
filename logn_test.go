@@ -3,19 +3,29 @@ package logn
 import (
 	"log"
 	"testing"
+	"time"
 )
 
 func TestGetLogger(t *testing.T) {
 	defer Sync()
 
 	hello := GetLogger("hello")
-	hello.Info("hello")
-	world := GetLogger("world")
-	world.Debug("world")
-
 	helloworld := GetLogger("helloworld")
-	helloworld.Info("hello world")
-	helloworld.Error("hell")
 
-	log.Println("hello")
+	ti := time.NewTimer(time.Second * 10)
+
+	out:
+	for {
+		select {
+		case <- ti.C:
+			break out
+		default:
+			hello.Info("hello")
+			world := GetLogger("world")
+			world.Debug("world")
+			helloworld.Info("hello world")
+			helloworld.Error("hell")
+			log.Println("hello")
+		}
+	}
 }
