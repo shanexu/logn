@@ -21,6 +21,8 @@ var configOpts = []ucfg.Option{
 	ucfg.PathSep("."),
 	ucfg.ResolveEnv,
 	ucfg.VarExp,
+	ucfg.StructTag("logn-config"),
+	ucfg.ValidatorTag("logn-validate"),
 }
 
 func NewConfig() *Config {

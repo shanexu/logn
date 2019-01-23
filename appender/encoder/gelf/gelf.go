@@ -15,12 +15,12 @@ type Encoder struct {
 }
 
 type KeyValuePair struct {
-	Key   string `config:"key"`
-	Value string `config:"value"`
+	Key   string `logn-config:"key"`
+	Value string `logn-config:"value"`
 }
 
 type Config struct {
-	KeyValuePairs []KeyValuePair `config:"key_value_pairs"`
+	KeyValuePairs []KeyValuePair `logn-config:"key_value_pairs"`
 }
 
 func (e *Encoder) EncodeEntry(enc zapcore.Entry, fields []zapcore.Field) (*buffer.Buffer, error) {

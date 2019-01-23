@@ -11,7 +11,7 @@ type File struct {
 }
 
 type Config struct {
-	FileName string `config:"file_name" validate:"required"`
+	FileName string `logn-config:"file_name" logn-validate:"required"`
 }
 
 var (

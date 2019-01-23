@@ -3,8 +3,8 @@ package config
 import "github.com/shanexu/logn/common"
 
 type Config struct {
-	Appenders map[string][]*common.Config `config:"appenders"`
-	Loggers   Loggers                     `config:"loggers"`
+	Appenders map[string][]*common.Config `logn-config:"appenders"`
+	Loggers   Loggers                     `logn-config:"loggers"`
 }
 
 var defaultConfig Config
@@ -14,19 +14,19 @@ func DefaultConfig() Config {
 }
 
 type Loggers struct {
-	Root   RootLogger `config:"root"`
-	Logger []Logger   `config:"logger"`
+	Root   RootLogger `logn-config:"root"`
+	Logger []Logger   `logn-config:"logger"`
 }
 
 type RootLogger struct {
-	Level        string   `config:"level"`
-	AppenderRefs []string `config:"appender_refs"`
+	Level        string   `logn-config:"level"`
+	AppenderRefs []string `logn-config:"appender_refs"`
 }
 
 type Logger struct {
-	Name         string   `config:"name" validate:"required"`
-	Level        string   `config:"level"`
-	AppenderRefs []string `config:"appender_refs"`
+	Name         string   `logn-config:"name" logn-validate:"required"`
+	Level        string   `logn-config:"level"`
+	AppenderRefs []string `logn-config:"appender_refs"`
 }
 
 func init() {

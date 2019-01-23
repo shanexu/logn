@@ -8,7 +8,7 @@ import (
 type Factory func(*common.Config) (Encoder, error)
 
 type Config struct {
-	Namespace common.ConfigNamespace `config:",inline"`
+	Namespace common.ConfigNamespace `logn-config:",inline"`
 }
 
 var encoders = map[string]Factory{}
