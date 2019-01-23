@@ -9,6 +9,10 @@ appenders:
       file_name: /tmp/app.log
       encoder:
         json:
+    - name: GELF_FILE
+      file_name: /tmp/app_gelf.log
+      encoder:
+        gelf:
     - name: METRICS
       file_name: /tmp/metrics.log
       encoder:
@@ -23,5 +27,6 @@ loggers:
       appender_refs:
         - CONSOLE
         - FILE
+        - GELF_FILE
       level: debug
 
