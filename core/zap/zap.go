@@ -19,6 +19,7 @@ type Core struct {
 	rootLevel        zapcore.LevelEnabler
 	rootLevelName    string
 	rootAppenderRefs []string
+	rootLogger       core.Logger
 }
 
 var StackTraceLevelEnabler = zap.NewAtomicLevelAt(zapcore.ErrorLevel)
@@ -53,7 +54,36 @@ func (c *Core) getAppender(name string) (*appender.Appender, error) {
 	return a, nil
 }
 
-func (c *Core) newLogger(loggerCfg cfg.Logger) (core.Logger, error) {
+func (c *Core) getAppenders(names []string) (map[string]*appender.Appender, error) {
+	m := make(map[string]*appender.Appender)
+	for _, name := range names {
+		a, err := c.getAppender(name)
+		if err != nil {
+			return nil, err
+		}
+		m[name] = a
+	}
+	return m, nil
+}
+
+func newZapCore(level zapcore.LevelEnabler, appenders map[string]*appender.Appender) zapcore.Core {
+	zcs := make([]zapcore.Core, 0)
+	for _, a := range appenders {
+		zcs = append(zcs, zapcore.NewCore(a.Encoder, a.Writer, level))
+	}
+	return zapcore.NewTee(zcs...)
+}
+
+func newLogger(name string, level zapcore.LevelEnabler, appenders map[string]*appender.Appender) core.Logger {
+	zc := newZapCore(level, appenders)
+	logger := zap.New(zc, zap.AddCaller(), zap.AddStacktrace(StackTraceLevelEnabler))
+	if name != "" {
+		logger = logger.Named(name)
+	}
+	return logger.Sugar()
+}
+
+func (c *Core) newLoggerFromCfg(loggerCfg cfg.Logger) (core.Logger, error) {
 	name := loggerCfg.Name
 	levelName := loggerCfg.Level
 	afs := loggerCfg.AppenderRefs
@@ -71,34 +101,20 @@ func (c *Core) newLogger(loggerCfg cfg.Logger) (core.Logger, error) {
 		return nil, err
 	}
 
-	am := make(map[string]*appender.Appender)
-	for a := range common.MakeStringSet(afs...) {
-		var err error
-		am[a], err = c.getAppender(a)
-		if err != nil {
-			return nil, err
-		}
+	am, err := c.getAppenders(afs)
+	if err != nil {
+		return nil, err
 	}
 
 	if len(am) == 0 {
 		return nil, errors.New("empty appenders")
 	}
 
-	zcs := make([]zapcore.Core, 0)
-	for _, a := range am {
-		zcs = append(zcs, zapcore.NewCore(a.Encoder, a.Writer, level))
-	}
-	zt := zapcore.NewTee(zcs...)
-	return zap.New(zt, zap.AddCaller(), zap.AddStacktrace(StackTraceLevelEnabler)).Named(name).Sugar(), nil
+	return newLogger(name, level, am), nil
 }
 
 func (c *Core) newNamedLogger(name string) core.Logger {
-	zcs := make([]zapcore.Core, 0)
-	for _, a := range c.rootAppenders {
-		zcs = append(zcs, zapcore.NewCore(a.Encoder, a.Writer, c.rootLevel))
-	}
-	zt := zapcore.NewTee(zcs...)
-	return zap.New(zt, zap.AddCaller(), zap.AddStacktrace(StackTraceLevelEnabler)).Named(name).Sugar()
+	return newLogger(name, c.rootLevel, c.rootAppenders)
 }
 
 func (c *Core) GetLogger(name string) core.Logger {
@@ -159,9 +175,13 @@ func New(rawConfig *common.Config) (core.Core, error) {
 	}
 	co.rootAppenderRefs = rootAppenderRefSet.ToSlice()
 
+	// rootLogger
+	co.rootLogger = newLogger("", co.rootLevel, co.rootAppenders)
+	zap.RedirectStdLog(co.rootLogger.(*zap.SugaredLogger).Desugar())
+
 	// loggers
 	for _, lc := range config.Loggers.Logger {
-		l, err := co.newLogger(lc)
+		l, err := co.newLoggerFromCfg(lc)
 		if err != nil {
 			return nil, err
 		}
@@ -169,6 +189,8 @@ func New(rawConfig *common.Config) (core.Core, error) {
 			return nil, fmt.Errorf("duplicated logger %q", lc.Name)
 		}
 	}
+
+	// redirect std logger
 
 	return &co, nil
 }
@@ -183,7 +205,7 @@ func (c *Core) Sync() {
 	}
 }
 
-func init()  {
+func init() {
 	core.RegisterType("zap", New)
 	core.RegisterType("default", New)
 }
