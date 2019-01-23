@@ -15,9 +15,9 @@ appenders:
         gelf:
           key_value_pairs:
             - key: env
-              value: ${env:ENV}
+              value: ${ENV:dev}
             - key: app
-              value: ${env:APPNAME}
+              value: ${APPNAME:test}
             - key: file
               value: app.log
     - name: METRICS
