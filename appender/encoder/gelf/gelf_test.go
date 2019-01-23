@@ -125,7 +125,7 @@ func (*dummyEncoder) OpenNamespace(key string) {
 
 func TestEncoder_EncodeEntry(t *testing.T) {
 	e := Encoder{
-		fields:  []zapcore.Field{zap.String("version", "1.1")},
+		Fields:  []zapcore.Field{zap.String("version", "1.1")},
 		Encoder: &dummyEncoder{},
 	}
 	b, _ := e.EncodeEntry(zapcore.Entry{}, []zapcore.Field{zap.String("seq_id", "123")})

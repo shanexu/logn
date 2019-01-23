@@ -13,6 +13,13 @@ appenders:
       file_name: /tmp/app_gelf.log
       encoder:
         gelf:
+          key_value_pairs:
+            - key: env
+              value: ${env:ENV}
+            - key: app
+              value: ${env:APPNAME}
+            - key: file
+              value: app.log
     - name: METRICS
       file_name: /tmp/metrics.log
       encoder:

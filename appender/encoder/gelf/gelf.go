@@ -10,18 +10,27 @@ import (
 )
 
 type Encoder struct {
-	fields []zapcore.Field
+	Fields []zapcore.Field
 	zapcore.Encoder
 }
 
+type KeyValuePair struct {
+	Key   string `config:"key"`
+	Value string `config:"value"`
+}
+
+type Config struct {
+	KeyValuePairs []KeyValuePair `config:"key_value_pairs"`
+}
+
 func (e *Encoder) EncodeEntry(enc zapcore.Entry, fields []zapcore.Field) (*buffer.Buffer, error) {
-	newFields := make([]zap.Field, len(e.fields)+len(fields))
+	newFields := make([]zap.Field, len(e.Fields)+len(fields))
 	i := 0
-	for ; i < len(e.fields); i++ {
-		newFields[i] = e.fields[i]
+	for ; i < len(e.Fields); i++ {
+		newFields[i] = e.Fields[i]
 	}
-	for ; i < len(e.fields)+len(fields); i++ {
-		j := i - len(e.fields)
+	for ; i < len(e.Fields)+len(fields); i++ {
+		j := i - len(e.Fields)
 		f := fields[j]
 		f.Key = "_" + f.Key
 		newFields[i] = f
@@ -51,7 +60,12 @@ func LevelEncoder(l zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
 }
 
 func init() {
-	encoder.RegisterType("gelf", func(config *common.Config) (i encoder.Encoder, e error) {
+	encoder.RegisterType("gelf", func(config *common.Config) (encoder.Encoder, error) {
+		cfg := Config{}
+		if err := config.Unpack(&cfg); err != nil {
+			return nil, err
+		}
+
 		encoderConfig := zapcore.EncoderConfig{
 			TimeKey:        "timestamp",
 			LevelKey:       "level",
@@ -73,8 +87,13 @@ func init() {
 			zap.String("version", "1.1"),
 			zap.String("host", hostname),
 		}
+
+		for _, kv := range cfg.KeyValuePairs {
+			fields = append(fields, zap.String(kv.Key, kv.Value))
+		}
+
 		return &Encoder{
-			fields:  fields,
+			Fields:  fields,
 			Encoder: zapcore.NewJSONEncoder(encoderConfig),
 		}, nil
 	})

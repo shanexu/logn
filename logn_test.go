@@ -5,6 +5,8 @@ import (
 )
 
 func TestGetLogger(t *testing.T) {
+	defer Sync()
+
 	hello := GetLogger("hello")
 	hello.Info("hello")
 	world := GetLogger("world")
@@ -13,5 +15,4 @@ func TestGetLogger(t *testing.T) {
 	helloworld := GetLogger("helloworld")
 	helloworld.Info("hello world")
 	helloworld.Error("hell")
-	Sync()
 }
