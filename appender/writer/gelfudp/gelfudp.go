@@ -30,7 +30,7 @@ var defaultConfig = Config{
 }
 
 const (
-	MaxDatagramSize = 16
+	MaxDatagramSize = 1420
 	HeadSize        = 12
 	MaxChunkSize    = MaxDatagramSize - HeadSize
 	MaxChunks       = 128
