@@ -14,7 +14,7 @@ appenders:
     - name: GRAYLOG
       host: 10.57.17.92
       port: 12201
-      compression_type: none
+      compression_type: gzip
       encoder:
         gelf:
           key_value_pairs:
