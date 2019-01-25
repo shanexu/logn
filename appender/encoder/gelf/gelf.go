@@ -89,7 +89,7 @@ func init() {
 		}
 
 		for _, kv := range cfg.KeyValuePairs {
-			fields = append(fields, zap.String(kv.Key, kv.Value))
+			fields = append(fields, zap.String("_"+kv.Key, kv.Value))
 		}
 
 		return &Encoder{

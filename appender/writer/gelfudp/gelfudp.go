@@ -18,7 +18,7 @@ import (
 type Config struct {
 	Host             string `logn-config:"host"`
 	Port             int    `logn-config:"port"`
-	CompressionType  string `logn-config:"compression_type" logn-validate:"oneof=none,gzip,zlib"`
+	CompressionType  string `logn-config:"compression_type" logn-validate:"logn.oneof=none gzip zlib"`
 	CompressionLevel int    `logn-config:"compression_level"`
 }
 
@@ -106,23 +106,6 @@ func (s *UDPSender) Send(message []byte) error {
 	return nil
 }
 
-type writeCloser struct {
-	bytes []byte
-}
-
-func (*writeCloser) Close() error {
-	return nil
-}
-
-func (w *writeCloser) Write(buf []byte) (int, error) {
-	w.bytes = buf[:]
-	return len(buf), nil
-}
-
-func (w *writeCloser) Bytes() []byte {
-	return w.bytes
-}
-
 func NewCompressor(compressionType string, compressionLevel int) (*Compressor, error) {
 	switch compressionType {
 	case "none":
@@ -155,7 +138,7 @@ func (c *Compressor) Compress(buf []byte) (int, []byte, error) {
 	)
 	switch c.compressionType {
 	case CompressionNone:
-		cw = &writeCloser{}
+		return len(buf), buf, nil
 	case CompressionGzip:
 		cw, err = gzip.NewWriterLevel(&cBuf, c.compressionLevel)
 	case CompressionZlib:
@@ -195,7 +178,7 @@ func (w *Writer) Write(p []byte) (n int, err error) {
 }
 
 func init() {
-	writer.RegisterType("gelfudp", func(rawConfig *common.Config) (writer.Writer, error) {
+	writer.RegisterType("gelf_udp", func(rawConfig *common.Config) (writer.Writer, error) {
 		config := defaultConfig
 		if err := rawConfig.Unpack(&config); err != nil {
 			return nil, err

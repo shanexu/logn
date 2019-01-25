@@ -10,6 +10,20 @@ appenders:
       file_name: /tmp/app.log
       encoder:
         json:
+  gelf_udp:
+    - name: GRAYLOG
+      host: 10.57.17.92
+      port: 12201
+      compression_type: none
+      encoder:
+        gelf:
+          key_value_pairs:
+            - key: env
+              value: ${ENV:dev}
+            - key: app
+              value: ${APPNAME:demo}
+            - key: file
+              value: app.log
   rolling_file:
     - name: GELF_FILE
       file_name: /tmp/app_gelf.log
@@ -34,5 +48,6 @@ loggers:
         - CONSOLE
         - FILE
         - GELF_FILE
+        - GRAYLOG
       level: debug
 

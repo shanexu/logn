@@ -13,13 +13,14 @@ func TestGetLogger(t *testing.T) {
 	helloworld := GetLogger("helloworld")
 
 	ti := time.NewTimer(time.Second * 10)
+	tc := time.NewTicker(time.Millisecond * 10)
 
 	out:
 	for {
 		select {
 		case <- ti.C:
 			break out
-		default:
+		case <- tc.C:
 			hello.Info("hello")
 			world := GetLogger("world")
 			world.Debug("world")
