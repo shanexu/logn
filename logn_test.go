@@ -22,6 +22,8 @@ func TestGetLogger(t *testing.T) {
 		hell += fmt.Sprintf("hell%d", i)
 	}
 
+	rootLogger := GetLogger()
+
 	out:
 	for {
 		select {
@@ -33,6 +35,7 @@ func TestGetLogger(t *testing.T) {
 			helloworld.Info("hello world")
 			helloworld.Error(hell)
 			log.Println("hello")
+			rootLogger.Info("root logger")
 		}
 	}
 }

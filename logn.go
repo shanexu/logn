@@ -96,6 +96,6 @@ func Sync() {
 	logncore.Sync()
 }
 
-func GetLogger(name string) core.Logger {
-	return logncore.GetLogger(name)
+func GetLogger(name ...string) core.Logger {
+	return logncore.GetLogger(name...)
 }

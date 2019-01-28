@@ -117,13 +117,16 @@ func (c *Core) newNamedLogger(name string) core.Logger {
 	return newLogger(name, c.rootLevel, c.rootAppenders)
 }
 
-func (c *Core) GetLogger(name string) core.Logger {
-	logger, ok := c.nameToLogger.Load(name)
+func (c *Core) GetLogger(name ...string) core.Logger {
+	if len(name) == 0 {
+		return c.rootLogger
+	}
+	logger, ok := c.nameToLogger.Load(name[0])
 	if ok {
 		return logger.(core.Logger)
 	}
-	zl := c.newNamedLogger(name)
-	v, _ := c.nameToLogger.LoadOrStore(name, zl)
+	zl := c.newNamedLogger(name[0])
+	v, _ := c.nameToLogger.LoadOrStore(name[0], zl)
 	return v.(core.Logger)
 }
 
