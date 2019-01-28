@@ -1,7 +1,6 @@
 package logn
 
 import (
-	"errors"
 	"fmt"
 	"github.com/shanexu/logn/common"
 	"github.com/shanexu/logn/core"
@@ -26,7 +25,9 @@ func init() {
 		matches := append(matches1, matches2...)
 		switch len(matches) {
 		case 0:
-			panic(errors.New("no config file found"))
+			if debug == "true" {
+				fmt.Println("no config file found using default config")
+			}
 		case 1:
 			configFile = matches[0]
 		default:
@@ -35,21 +36,43 @@ func init() {
 	}
 
 	var err error
-	configFile, err = filepath.Abs(configFile)
-	if err != nil {
-		panic(err)
-	}
+	var rawConfig *common.Config
 
-	if debug == "true" {
-		fmt.Println("logn using config file:", configFile)
-		bs, err := ioutil.ReadFile(configFile)
+	if configFile != "" {
+		// load ConfigFile
+		configFile, err = filepath.Abs(configFile)
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(string(bs))
+
+		if debug == "true" {
+			fmt.Println("logn using config file:", configFile)
+			bs, err := ioutil.ReadFile(configFile)
+			if err != nil {
+				panic(err)
+			}
+			fmt.Println(string(bs))
+		}
+
+		rawConfig, err = common.LoadFile(configFile)
+	} else {
+		// load default config
+		rawConfig, err = common.NewConfigFrom(`
+appenders:
+  console:
+    - name: CONSOLE
+      target: stdout
+      encoder:
+        console:
+          time_encoder: ISO8601
+loggers:
+  root:
+    level: info
+    appender_refs:
+      - CONSOLE
+`)
 	}
 
-	rawConfig, err := common.LoadFile(configFile)
 	if err != nil {
 		panic(err)
 	}
