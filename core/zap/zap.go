@@ -131,6 +131,11 @@ func (c *Core) GetLogger(name ...string) core.Logger {
 	return v.(core.Logger)
 }
 
+func (c *Core)Update(rawConfig *common.Config) error {
+
+	return nil
+}
+
 func New(rawConfig *common.Config) (core.Core, error) {
 	config := cfg.DefaultConfig()
 	err := rawConfig.Unpack(&config)
@@ -193,11 +198,13 @@ func New(rawConfig *common.Config) (core.Core, error) {
 		}
 	}
 
-	// redirect std logger
-	zap.RedirectStdLog(co.GetLogger("stdlog").(*zap.SugaredLogger).Desugar())
 	co.Logger = co.rootLogger.(*zap.SugaredLogger).Desugar().WithOptions(zap.AddCallerSkip(1)).Sugar()
 
 	return &co, nil
+}
+
+func (c *Core) RedirectStdLog() {
+	zap.RedirectStdLog(c.GetLogger("stdlog").(*zap.SugaredLogger).Desugar())
 }
 
 func (c *Core) Sync() error {

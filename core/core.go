@@ -1,7 +1,11 @@
 package core
 
+import "github.com/shanexu/logn/common"
+
 type Core interface {
 	GetLogger(name ...string) Logger
+	Update(rawConfig *common.Config) error
+	RedirectStdLog()
 	Logger
 }
 

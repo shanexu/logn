@@ -53,3 +53,7 @@ func TestGlobalLog(t *testing.T) {
 	Info("hello")
 	Error("hell")
 }
+
+func TestRedirectStdLog(t *testing.T) {
+	log.Println("hello")
+}

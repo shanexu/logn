@@ -14,8 +14,6 @@ import (
 )
 
 var logncore core.Core
-var rootLogger core.Logger
-
 
 func ConfigWithRawConfig(rawConfig *common.Config) (core.Core, error) {
 	co, err := core.CreateCore(rawConfig)
@@ -94,7 +92,7 @@ loggers:
 		panic(err)
 	}
 	logncore = co
-	rootLogger = co.GetLogger()
+	logncore.RedirectStdLog()
 
 	go func() {
 		quit := make(chan os.Signal)
