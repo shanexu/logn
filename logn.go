@@ -14,6 +14,17 @@ import (
 )
 
 var logncore core.Core
+var rootLogger core.Logger
+
+
+func ConfigWithRawConfig(rawConfig *common.Config) (core.Core, error) {
+	co, err := core.CreateCore(rawConfig)
+
+	if err != nil {
+		return nil, err
+	}
+	return co, nil
+}
 
 func init() {
 	configFile := os.Getenv("LOGN_CONFIG")
@@ -77,12 +88,13 @@ loggers:
 		panic(err)
 	}
 
-	co, err := core.CreateCore(rawConfig)
+	co, err := ConfigWithRawConfig(rawConfig)
 
 	if err != nil {
 		panic(err)
 	}
 	logncore = co
+	rootLogger = co.GetLogger()
 
 	go func() {
 		quit := make(chan os.Signal)

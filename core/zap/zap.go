@@ -20,6 +20,7 @@ type Core struct {
 	rootLevelName    string
 	rootAppenderRefs []string
 	rootLogger       core.Logger
+	core.Logger
 }
 
 var StackTraceLevelEnabler = zap.NewAtomicLevelAt(zapcore.ErrorLevel)
@@ -194,11 +195,12 @@ func New(rawConfig *common.Config) (core.Core, error) {
 
 	// redirect std logger
 	zap.RedirectStdLog(co.GetLogger("stdlog").(*zap.SugaredLogger).Desugar())
+	co.Logger = co.rootLogger.(*zap.SugaredLogger).Desugar().WithOptions(zap.AddCallerSkip(1)).Sugar()
 
 	return &co, nil
 }
 
-func (c *Core) Sync() {
+func (c *Core) Sync() error {
 	c.nameToLogger.Range(func(_, value interface{}) bool {
 		value.(core.Logger).Sync()
 		return false
@@ -206,6 +208,7 @@ func (c *Core) Sync() {
 	for _, a := range c.rootAppenders {
 		a.Writer.Sync()
 	}
+	return nil
 }
 
 func init() {

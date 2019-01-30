@@ -2,7 +2,7 @@ package core
 
 type Core interface {
 	GetLogger(name ...string) Logger
-	Sync()
+	Logger
 }
 
 type Logger interface {

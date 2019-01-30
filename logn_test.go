@@ -48,3 +48,8 @@ func TestGetLogger2(t *testing.T) {
 	}
 	helloworld.Error(hell)
 }
+
+func TestGlobalLog(t *testing.T) {
+	Info("hello")
+	Error("hell")
+}
