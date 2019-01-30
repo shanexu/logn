@@ -180,7 +180,6 @@ func New(rawConfig *common.Config) (core.Core, error) {
 
 	// rootLogger
 	co.rootLogger = newLogger("", co.rootLevel, co.rootAppenders)
-	zap.RedirectStdLog(co.rootLogger.(*zap.SugaredLogger).Desugar())
 
 	// loggers
 	for _, lc := range config.Loggers.Logger {
@@ -194,6 +193,7 @@ func New(rawConfig *common.Config) (core.Core, error) {
 	}
 
 	// redirect std logger
+	zap.RedirectStdLog(co.GetLogger("stdlog").(*zap.SugaredLogger).Desugar())
 
 	return &co, nil
 }
