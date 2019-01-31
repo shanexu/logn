@@ -2,6 +2,7 @@ package logn
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
 	"time"
@@ -56,4 +57,44 @@ func TestGlobalLog(t *testing.T) {
 
 func TestRedirectStdLog(t *testing.T) {
 	log.Println("hello")
+}
+
+func TestInitWithConfigContent(t *testing.T) {
+	const newConfig = `appenders:
+  console:
+    - name: CONSOLE
+      target: stdout
+      encoder:
+        console:
+loggers:
+  root:
+    level: info
+    appender_refs:
+      - CONSOLE`
+	l := GetLogger("l")
+	Info("hello")
+	l.Info("hello")
+	err := InitWithConfigContent(newConfig)
+	assert.Nil(t, err)
+	Info("world")
+	l.Info("world")
+	err = InitWithConfigContent(newConfig)
+	assert.NotNil(t, err)
+}
+
+func TestInitWithConfigFile(t *testing.T) {
+	l := GetLogger("l")
+	Info("hello")
+	l.Info("hello")
+	err := InitWithConfigFile("test/.logn.yml")
+	assert.Nil(t, err)
+	Info("hello")
+	l.Info("hello")
+	err = InitWithConfigFile("test/.logn.yml")
+	assert.NotNil(t, err)
+}
+
+func TestInitWithConfigFile2(t *testing.T) {
+	err := InitWithConfigFile("test/.logn_not_exist.yml")
+	assert.NotNil(t, err)
 }

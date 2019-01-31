@@ -119,19 +119,28 @@ func (c *Core) newNamedLogger(name string) core.Logger {
 	return newLogger(name, c.rootLevel, c.rootAppenders)
 }
 
-func (c *Core) GetLogger(name ...string) core.Logger {
-	c.locker.RLock()
-	defer c.locker.RUnlock()
+func (c *Core) getLogger(name string, lock bool) *zap.SugaredLogger {
+	if lock {
+		c.locker.RLock()
+		defer c.locker.RUnlock()
+	}
 	if len(name) == 0 {
 		return c.rootLogger
 	}
-	logger, ok := c.nameToLogger.Load(name[0])
+	logger, ok := c.nameToLogger.Load(name)
 	if ok {
-		return logger.(core.Logger)
+		return logger.(*zap.SugaredLogger)
 	}
-	zl := c.newNamedLogger(name[0])
-	v, _ := c.nameToLogger.LoadOrStore(name[0], zl)
-	return v.(core.Logger)
+	zl := c.newNamedLogger(name)
+	v, _ := c.nameToLogger.LoadOrStore(name, zl)
+	return v.(*zap.SugaredLogger)
+}
+
+func (c *Core) GetLogger(name ...string) core.Logger {
+	if len(name) == 0 {
+		return c.getLogger("", true)
+	}
+	return c.getLogger(name[0], true)
 }
 
 func (c *Core) Update(rawConfig *common.Config) error {
@@ -152,15 +161,15 @@ func (c *Core) Update(rawConfig *common.Config) error {
 	c.globalLogger = nc.globalLogger
 	c.nameToLogger.Range(func(key, value interface{}) bool {
 		name := key.(string)
-		*value.(*zap.SugaredLogger) = *nc.GetLogger(name).(*zap.SugaredLogger)
+		*value.(*zap.SugaredLogger) = *nc.getLogger(name, false)
 		return true
 	})
-	c.RedirectStdLog()
+	c.redirectStdLog()
 	return nil
 }
 
 func newCore(rawConfig *common.Config) (*Core, error) {
-	config := cfg.DefaultConfig()
+	config := cfg.Config{}
 	err := rawConfig.Unpack(&config)
 	if err != nil {
 		return nil, err
@@ -231,7 +240,11 @@ func New(rawConfig *common.Config) (core.Core, error) {
 }
 
 func (c *Core) RedirectStdLog() {
-	zap.RedirectStdLog(c.GetLogger("stdlog").(*zap.SugaredLogger).Desugar())
+	zap.RedirectStdLog(c.getLogger("stdlog", true).Desugar())
+}
+
+func (c *Core) redirectStdLog() {
+	zap.RedirectStdLog(c.getLogger("stdlog", false).Desugar())
 }
 
 func (c *Core) Sync() error {

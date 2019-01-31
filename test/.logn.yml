@@ -1,0 +1,12 @@
+appenders:
+  console:
+    - name: CONSOLE
+      target: stdout
+      encoder:
+        console:
+          time_encoder: epoch_millis
+loggers:
+  root:
+    level: info
+    appender_refs:
+      - CONSOLE
