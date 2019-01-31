@@ -13,14 +13,15 @@ import (
 )
 
 type Core struct {
+	locker           sync.RWMutex
 	nameToLogger     sync.Map
 	nameToAppender   map[string]*appender.Appender
 	rootAppenders    map[string]*appender.Appender
 	rootLevel        zapcore.LevelEnabler
 	rootLevelName    string
 	rootAppenderRefs []string
-	rootLogger       core.Logger
-	core.Logger
+	rootLogger       *zap.SugaredLogger
+	globalLogger     *zap.SugaredLogger
 }
 
 var StackTraceLevelEnabler = zap.NewAtomicLevelAt(zapcore.ErrorLevel)
@@ -75,7 +76,7 @@ func newZapCore(level zapcore.LevelEnabler, appenders map[string]*appender.Appen
 	return zapcore.NewTee(zcs...)
 }
 
-func newLogger(name string, level zapcore.LevelEnabler, appenders map[string]*appender.Appender) core.Logger {
+func newLogger(name string, level zapcore.LevelEnabler, appenders map[string]*appender.Appender) *zap.SugaredLogger {
 	zc := newZapCore(level, appenders)
 	logger := zap.New(zc, zap.AddCaller(), zap.AddStacktrace(StackTraceLevelEnabler))
 	if name != "" {
@@ -119,6 +120,8 @@ func (c *Core) newNamedLogger(name string) core.Logger {
 }
 
 func (c *Core) GetLogger(name ...string) core.Logger {
+	c.locker.RLock()
+	defer c.locker.RUnlock()
 	if len(name) == 0 {
 		return c.rootLogger
 	}
@@ -131,12 +134,32 @@ func (c *Core) GetLogger(name ...string) core.Logger {
 	return v.(core.Logger)
 }
 
-func (c *Core)Update(rawConfig *common.Config) error {
-
+func (c *Core) Update(rawConfig *common.Config) error {
+	nc, err := newCore(rawConfig)
+	if err != nil {
+		return err
+	}
+	c.locker.Lock()
+	defer c.locker.Unlock()
+	c.Sync()
+	c.nameToAppender = nc.nameToAppender
+	c.rootAppenders = nc.rootAppenders
+	c.rootLevel = nc.rootLevel
+	c.rootLevelName = nc.rootLevelName
+	c.rootAppenderRefs = nc.rootAppenderRefs
+	*c.rootLogger = *nc.rootLogger
+	c.rootAppenders = nc.rootAppenders
+	c.globalLogger = nc.globalLogger
+	c.nameToLogger.Range(func(key, value interface{}) bool {
+		name := key.(string)
+		*value.(*zap.SugaredLogger) = *nc.GetLogger(name).(*zap.SugaredLogger)
+		return true
+	})
+	c.RedirectStdLog()
 	return nil
 }
 
-func New(rawConfig *common.Config) (core.Core, error) {
+func newCore(rawConfig *common.Config) (*Core, error) {
 	config := cfg.DefaultConfig()
 	err := rawConfig.Unpack(&config)
 	if err != nil {
@@ -198,9 +221,13 @@ func New(rawConfig *common.Config) (core.Core, error) {
 		}
 	}
 
-	co.Logger = co.rootLogger.(*zap.SugaredLogger).Desugar().WithOptions(zap.AddCallerSkip(1)).Sugar()
+	co.globalLogger = co.rootLogger.Desugar().WithOptions(zap.AddCallerSkip(2)).Sugar()
 
 	return &co, nil
+}
+
+func New(rawConfig *common.Config) (core.Core, error) {
+	return newCore(rawConfig)
 }
 
 func (c *Core) RedirectStdLog() {
