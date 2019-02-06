@@ -164,6 +164,13 @@ func (c *Core) Update(rawConfig *common.Config) error {
 		*value.(*zap.SugaredLogger) = *nc.getLogger(name, false)
 		return true
 	})
+	nc.nameToLogger.Range(func(key, value interface{}) bool {
+		if _, found := c.nameToLogger.Load(key); found {
+			return true
+		}
+		c.nameToLogger.Store(key, value)
+		return true
+	})
 	c.redirectStdLog()
 	return nil
 }
