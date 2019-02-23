@@ -1,5 +1,7 @@
 package zap
 
+import "go.uber.org/zap"
+
 func (c *Core) Debug(args ...interface{}) {
 	c.locker.RLock()
 	c.locker.RUnlock()
@@ -86,4 +88,8 @@ func (c *Core) Panicw(msg string, keysAndValues ...interface{}) {
 
 func (c *Core) DPanicw(msg string, keysAndValues ...interface{}) {
 	c.globalLogger.DPanicw(msg, keysAndValues...)
+}
+
+type Wrap struct {
+	*zap.SugaredLogger
 }
