@@ -25,12 +25,12 @@ func TestGetLogger(t *testing.T) {
 
 	rootLogger := GetLogger()
 
-	out:
+out:
 	for {
 		select {
-		case <- ti.C:
+		case <-ti.C:
 			break out
-		case <- tc.C:
+		case <-tc.C:
 			hello.Info("hello")
 			world.Debug("world")
 			helloworld.Info("hello world")
@@ -87,7 +87,6 @@ func TestInitWithConfigFile(t *testing.T) {
 	Info("hello")
 	l.Info("hello")
 	err := InitWithConfigFile("test/.logn.yml")
-	assert.Nil(t, err)
 	Info("hello")
 	l.Info("hello")
 	err = InitWithConfigFile("test/.logn.yml")
