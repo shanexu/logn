@@ -4,11 +4,15 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"log"
+	"os"
 	"testing"
 	"time"
 )
 
 func TestGetLogger(t *testing.T) {
+	if os.Getenv("LONG_TEST") != "on" {
+		t.Skip("skip long test")
+	}
 	defer Sync()
 
 	hello := GetLogger("hello")
