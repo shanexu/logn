@@ -1,16 +1,21 @@
 package logn
 
 import (
+	"crypto/md5"
 	"fmt"
-	"github.com/pkg/errors"
-	"github.com/shanexu/logn/common"
-	"github.com/shanexu/logn/core"
 	"io/ioutil"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"sync"
 	"syscall"
+	"time"
+
+	"github.com/pkg/errors"
+
+	"github.com/shanexu/logn/common"
+	"github.com/shanexu/logn/config"
+	"github.com/shanexu/logn/core"
 
 	_ "github.com/shanexu/logn/includes"
 )
@@ -27,6 +32,9 @@ loggers:
     level: info
     appender_refs:
       - CONSOLE
+
+scan: false
+scan_period: 1m
 `
 
 var (
@@ -95,7 +103,7 @@ func InitWithConfigFile(path string) error {
 		fmt.Println(string(bs))
 	}
 
-	rawConfig, err := common.LoadFile(path)
+	rawConfig, configFileHash, err := common.LoadFile(path)
 	if err != nil {
 		return err
 	}
@@ -107,6 +115,8 @@ func InitWithConfigFile(path string) error {
 
 	configFile = path
 	explicitInited = true
+
+	watchConfigFile(configFile, configFileHash, rawConfig)
 
 	return nil
 }
@@ -159,6 +169,7 @@ func init() {
 
 	var err error
 	var rawConfig *common.Config
+	var configFileHash [md5.Size]byte
 
 	if configFile != "" {
 		// load ConfigFile
@@ -176,7 +187,7 @@ func init() {
 			fmt.Println(string(bs))
 		}
 
-		rawConfig, err = common.LoadFile(configFile)
+		rawConfig, configFileHash, err = common.LoadFile(configFile)
 	} else {
 		if debug {
 			fmt.Print("logn using default config:\n" + DefaultConfig)
@@ -201,12 +212,62 @@ func init() {
 		explicitInited = true
 	}
 
+	if explicitInited {
+		watchConfigFile(configFile, configFileHash, rawConfig)
+	}
+
 	go func() {
 		quit := make(chan os.Signal)
 		signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 		<-quit
 		Sync()
 	}()
+}
+
+func watchConfigFile(configFile string, configFileHash [md5.Size]byte, rawConfig *common.Config) {
+	scanConfig := config.ScanConfig{
+		Scan:       false,
+		ScanPeriod: "1m",
+	}
+	if err := rawConfig.Unpack(&scanConfig); err != nil {
+		panic(err)
+	}
+	if scanConfig.Scan {
+		scanPeriod, err := time.ParseDuration(scanConfig.ScanPeriod)
+		if err != nil {
+			panic(err)
+		}
+		defer func() {
+			for {
+				t := time.NewTimer(scanPeriod)
+				<-t.C
+				rawConfig, hash, err := common.LoadFile(configFile)
+				if err != nil {
+					continue
+				}
+				if configFileHash != hash {
+					configFileHash = hash
+					if err := logncore.Update(rawConfig); err == nil {
+						scanConfig = config.ScanConfig{
+							Scan:       false,
+							ScanPeriod: "1m",
+						}
+						if err := rawConfig.Unpack(&scanConfig); err != nil {
+							continue
+						}
+						if !scanConfig.Scan {
+							break
+						}
+						sp, err := time.ParseDuration(scanConfig.ScanPeriod)
+						if err != nil {
+							continue
+						}
+						scanPeriod = sp
+					}
+				}
+			}
+		}()
+	}
 }
 
 func Sync() {

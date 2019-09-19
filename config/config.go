@@ -1,10 +1,17 @@
 package config
 
-import "github.com/shanexu/logn/common"
+import (
+	"github.com/shanexu/logn/common"
+)
 
 type Config struct {
 	Appenders map[string][]*common.Config `logn-config:"appenders"`
 	Loggers   Loggers                     `logn-config:"loggers"`
+}
+
+type ScanConfig struct {
+	Scan       bool   `logn-config:"scan"`
+	ScanPeriod string `logn-config:"scan_period"`
 }
 
 type Loggers struct {

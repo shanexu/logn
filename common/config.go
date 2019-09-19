@@ -1,9 +1,11 @@
 package common
 
 import (
+	"crypto/md5"
 	"errors"
+	"io/ioutil"
+
 	"github.com/elastic/go-ucfg"
-	"github.com/elastic/go-ucfg/cfgutil"
 	"github.com/elastic/go-ucfg/yaml"
 )
 
@@ -87,26 +89,18 @@ func OverwriteConfigOpts(options []ucfg.Option) {
 	configOpts = options
 }
 
-func LoadFile(path string) (*Config, error) {
-
-	c, err := yaml.NewConfigWithFile(path, configOpts...)
+func LoadFile(path string) (*Config, [md5.Size]byte, error) {
+	bs, err := ioutil.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return nil, [md5.Size]byte{}, err
 	}
-
+	hash := md5.Sum(bs)
+	c, err := yaml.NewConfig(bs, configOpts...)
+	if err != nil {
+		return nil, hash, err
+	}
 	cfg := fromConfig(c)
-	return cfg, err
-}
-
-func LoadFiles(paths ...string) (*Config, error) {
-	merger := cfgutil.NewCollector(nil, configOpts...)
-	for _, path := range paths {
-		cfg, err := LoadFile(path)
-		if err := merger.Add(cfg.access(), err); err != nil {
-			return nil, err
-		}
-	}
-	return fromConfig(merger.Config()), nil
+	return cfg, hash, err
 }
 
 func (c *Config) Merge(from interface{}) error {
