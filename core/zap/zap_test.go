@@ -1,10 +1,13 @@
-package zap
+package zap_test
 
 import (
-	"github.com/shanexu/logn/common"
-	_ "github.com/shanexu/logn/includes"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/shanexu/logn/common"
+	"github.com/shanexu/logn/core/zap"
+	_ "github.com/shanexu/logn/includes"
 )
 
 func TestNew(t *testing.T) {
@@ -39,7 +42,7 @@ loggers:
 	if err != nil {
 		t.Fatal(err)
 	}
-	c, err := New(rawConfig)
+	c, err := zap.New(rawConfig)
 	assert.NotNil(t, c)
 	assert.Nil(t, err)
 
