@@ -116,7 +116,7 @@ func InitWithConfigFile(path string) error {
 	configFile = path
 	explicitInited = true
 
-	watchConfigFile(configFile, configFileHash, rawConfig)
+	scanConfigFile(configFile, configFileHash, rawConfig)
 
 	return nil
 }
@@ -213,7 +213,7 @@ func init() {
 	}
 
 	if explicitInited {
-		watchConfigFile(configFile, configFileHash, rawConfig)
+		scanConfigFile(configFile, configFileHash, rawConfig)
 	}
 
 	go func() {
@@ -224,7 +224,7 @@ func init() {
 	}()
 }
 
-func watchConfigFile(configFile string, configFileHash [md5.Size]byte, rawConfig *common.Config) {
+func scanConfigFile(configFile string, configFileHash [md5.Size]byte, rawConfig *common.Config) {
 	scanConfig := config.ScanConfig{
 		Scan:       false,
 		ScanPeriod: "1m",
@@ -238,34 +238,21 @@ func watchConfigFile(configFile string, configFileHash [md5.Size]byte, rawConfig
 			panic(err)
 		}
 		defer func() {
-			for {
-				t := time.NewTimer(scanPeriod)
-				<-t.C
-				rawConfig, hash, err := common.LoadFile(configFile)
-				if err != nil {
-					continue
-				}
-				if configFileHash != hash {
-					configFileHash = hash
-					if err := logncore.Update(rawConfig); err == nil {
-						scanConfig = config.ScanConfig{
-							Scan:       false,
-							ScanPeriod: "1m",
-						}
-						if err := rawConfig.Unpack(&scanConfig); err != nil {
-							continue
-						}
-						if !scanConfig.Scan {
-							break
-						}
-						sp, err := time.ParseDuration(scanConfig.ScanPeriod)
-						if err != nil {
-							continue
-						}
-						scanPeriod = sp
+			go func() {
+				for {
+					t := time.NewTimer(scanPeriod)
+					<-t.C
+					rawConfig, hash, err := common.LoadFile(configFile)
+					if err != nil {
+						continue
 					}
+					if configFileHash == hash {
+						continue
+					}
+					configFileHash = hash
+					logncore.Update(rawConfig)
 				}
-			}
+			}()
 		}()
 	}
 }
