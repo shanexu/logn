@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/signal"
 	"path/filepath"
 	"sync"
-	"syscall"
 	"time"
 
 	"github.com/pkg/errors"
@@ -215,13 +213,6 @@ func init() {
 	if explicitInited {
 		scanConfigFile(configFile, configFileHash, rawConfig)
 	}
-
-	go func() {
-		quit := make(chan os.Signal)
-		signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
-		<-quit
-		Sync()
-	}()
 }
 
 func scanConfigFile(configFile string, configFileHash [md5.Size]byte, rawConfig *common.Config) {

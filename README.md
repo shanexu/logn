@@ -76,6 +76,7 @@ package main
 import "github.com/shanexu/logn"
 
 func main() {
+    defer logn.Sync()
 	helloWorld := logn.GetLogger("helloworld")
 	helloWorld.Info("hello, shane!")
 
