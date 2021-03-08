@@ -21,11 +21,13 @@ type Loggers struct {
 
 type RootLogger struct {
 	Level        string   `logn-config:"level"`
+	CallerSkip   *int     `logn-config:"caller_skip"`
 	AppenderRefs []string `logn-config:"appender_refs"`
 }
 
 type Logger struct {
 	Name         string   `logn-config:"name" logn-validate:"required"`
 	Level        string   `logn-config:"level"`
+	CallerSkip   *int     `logn-config:"caller_skip"`
 	AppenderRefs []string `logn-config:"appender_refs"`
 }

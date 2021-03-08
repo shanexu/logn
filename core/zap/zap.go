@@ -2,14 +2,16 @@ package zap
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+
 	"github.com/shanexu/logn/appender"
 	"github.com/shanexu/logn/common"
 	cfg "github.com/shanexu/logn/config"
 	"github.com/shanexu/logn/core"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-	"sync"
 )
 
 type Core struct {
@@ -19,6 +21,7 @@ type Core struct {
 	rootAppenders    map[string]*appender.Appender
 	rootLevel        zapcore.LevelEnabler
 	rootLevelName    string
+	rootCallerSkip   *int
 	rootAppenderRefs []string
 	rootLogger       *zap.SugaredLogger
 	globalLogger     *zap.SugaredLogger
@@ -76,9 +79,13 @@ func newZapCore(level zapcore.LevelEnabler, appenders map[string]*appender.Appen
 	return zapcore.NewTee(zcs...)
 }
 
-func newLogger(name string, level zapcore.LevelEnabler, appenders map[string]*appender.Appender) *zap.SugaredLogger {
+func newLogger(name string, level zapcore.LevelEnabler, callerSkip *int, appenders map[string]*appender.Appender) *zap.SugaredLogger {
 	zc := newZapCore(level, appenders)
-	logger := zap.New(zc, zap.AddCaller(), zap.AddStacktrace(StackTraceLevelEnabler))
+	cs := 0
+	if callerSkip != nil {
+		cs = *callerSkip
+	}
+	logger := zap.New(zc, zap.AddCaller(), zap.AddStacktrace(StackTraceLevelEnabler), zap.AddCallerSkip(cs))
 	if name != "" {
 		logger = logger.Named(name)
 	}
@@ -89,6 +96,7 @@ func (c *Core) newLoggerFromCfg(loggerCfg cfg.Logger) (core.Logger, error) {
 	name := loggerCfg.Name
 	levelName := loggerCfg.Level
 	afs := loggerCfg.AppenderRefs
+	callerSkip := loggerCfg.CallerSkip
 
 	if levelName == "" {
 		levelName = c.rootLevelName
@@ -96,6 +104,10 @@ func (c *Core) newLoggerFromCfg(loggerCfg cfg.Logger) (core.Logger, error) {
 
 	if len(afs) == 0 {
 		afs = c.rootAppenderRefs
+	}
+
+	if callerSkip == nil {
+		callerSkip = loggerCfg.CallerSkip
 	}
 
 	level, err := createLevel(levelName)
@@ -112,11 +124,11 @@ func (c *Core) newLoggerFromCfg(loggerCfg cfg.Logger) (core.Logger, error) {
 		return nil, errors.New("empty appenders")
 	}
 
-	return newLogger(name, level, am), nil
+	return newLogger(name, level, callerSkip, am), nil
 }
 
 func (c *Core) newNamedLogger(name string) core.Logger {
-	return newLogger(name, c.rootLevel, c.rootAppenders)
+	return newLogger(name, c.rootLevel, c.rootCallerSkip, c.rootAppenders)
 }
 
 func (c *Core) getLogger(name string, lock bool) *zap.SugaredLogger {
@@ -155,6 +167,7 @@ func (c *Core) Update(rawConfig *common.Config) error {
 	c.rootAppenders = nc.rootAppenders
 	c.rootLevel = nc.rootLevel
 	c.rootLevelName = nc.rootLevelName
+	c.rootCallerSkip = nc.rootCallerSkip
 	c.rootAppenderRefs = nc.rootAppenderRefs
 	*c.rootLogger = *nc.rootLogger
 	c.rootAppenders = nc.rootAppenders
@@ -212,6 +225,8 @@ func newCore(rawConfig *common.Config) (*Core, error) {
 	co.rootLevel = rootLevel
 	co.rootLevelName = config.Loggers.Root.Level
 
+	co.rootCallerSkip = config.Loggers.Root.CallerSkip
+
 	// rootAppenders
 	rootAppenderRefSet := common.MakeStringSet(config.Loggers.Root.AppenderRefs...)
 	for appenderRef := range rootAppenderRefSet {
@@ -224,7 +239,7 @@ func newCore(rawConfig *common.Config) (*Core, error) {
 	co.rootAppenderRefs = rootAppenderRefSet.ToSlice()
 
 	// rootLogger
-	co.rootLogger = newLogger("", co.rootLevel, co.rootAppenders)
+	co.rootLogger = newLogger("", co.rootLevel, co.rootCallerSkip, co.rootAppenders)
 
 	// loggers
 	for _, lc := range config.Loggers.Logger {
