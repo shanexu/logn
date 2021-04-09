@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/shanexu/logn/common"
 	"github.com/shanexu/logn/config"
@@ -27,7 +28,7 @@ const DefaultConfig = `appenders:
           time_encoder: ISO8601
 loggers:
   root:
-    level: info
+    level: debug
     appender_refs:
       - CONSOLE
 
@@ -254,4 +255,8 @@ func Sync() {
 
 func GetLogger(name ...string) core.Logger {
 	return logncore.GetLogger(name...)
+}
+
+func WithLogger(l core.Logger, args ...interface{}) core.Logger {
+	return l.(*zap.SugaredLogger).With(args...)
 }

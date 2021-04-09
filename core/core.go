@@ -6,6 +6,7 @@ type Core interface {
 	GetLogger(name ...string) Logger
 	Update(rawConfig *common.Config) error
 	RedirectStdLog()
+	Global() Logger
 	Logger
 }
 

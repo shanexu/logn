@@ -252,7 +252,7 @@ func newCore(rawConfig *common.Config) (*Core, error) {
 		}
 	}
 
-	co.globalLogger = co.rootLogger.Desugar().WithOptions(zap.AddCallerSkip(2)).Sugar()
+	co.globalLogger = co.rootLogger.With().Desugar().WithOptions(zap.AddCallerSkip(2)).Sugar()
 
 	return &co, nil
 }
@@ -278,6 +278,10 @@ func (c *Core) Sync() error {
 		a.Writer.Sync()
 	}
 	return nil
+}
+
+func (c *Core) Global() core.Logger {
+	return c.globalLogger
 }
 
 func init() {

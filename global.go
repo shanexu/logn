@@ -1,5 +1,11 @@
 package logn
 
+import (
+	"go.uber.org/zap"
+
+	"github.com/shanexu/logn/core"
+)
+
 func Debug(args ...interface{}) {
 	logncore.Debug(args...)
 }
@@ -127,4 +133,13 @@ func Panicw(msg string, keysAndValues ...interface{}) {
 // Field such as logp.Stringer.
 func DPanicw(msg string, keysAndValues ...interface{}) {
 	logncore.DPanicw(msg, keysAndValues...)
+}
+
+
+func With(keysAndValues ...interface{}) core.Logger {
+	return logncore.Global().(*zap.SugaredLogger).
+		With(keysAndValues...).
+		Desugar().
+		WithOptions(zap.AddCallerSkip(0)).
+		Sugar()
 }
